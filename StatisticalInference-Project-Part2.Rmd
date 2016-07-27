@@ -1,0 +1,87 @@
+---
+title: 'Data Science: Statistical Inference - Project Part 2 (Basic Inferential Data Analysis)'
+author: "Jagannatha Reddy"
+date: "July 26, 2016"
+output: pdf_document
+---
+
+#### **Problem Description** 
+
+In this project you will analyze the ToothGrowth data in the R datasets package. You should
+
+1. Load the ToothGrowth data and perform some basic exploratory data analyses
+1. Provide a basic summary of the data.
+1. Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. (Only use the techniques from class, even if there's other approaches worth considering)
+1. State your conclusions and the assumptions needed for your conclusions.
+
+#### **Synopsis**
+
+In this project we will analyze the ToothGrowth data avaiable as part of the **datasets** package of R. ToothGrowth data has data to track the Effect of Vitamin C on Tooth Growth in Guinea Pigs
+
+#### **1) Load the ToothGrowth data and perform some basic exploratory data analyses**
+
+```{r}
+echo=TRUE
+cache=TRUE
+# load the required libraries
+library(datasets)
+library(lattice)
+head(ToothGrowth)
+dim(ToothGrowth)
+# do a basic plot
+xyplot(len~dose|supp, data=ToothGrowth, layout=c(4,1), xlab="Dose (mg/day)", ylab="Length")
+```
+
+You can observe that there are totally 60 observations in the TotalGrowth dataset with each observation having 3 columns to represent Tooth length (len), Supplement type (supp), and Dose in milligrams/day (dose)
+
+#### **2) Provide a basic summary of the data.**
+
+```{r}
+library(ggplot2)
+summary(ToothGrowth)
+ToothGrowth$dose <- as.factor(ToothGrowth$dose) # make the dose value as factor
+summary(ToothGrowth) # print the summary of data
+g<-ggplot(aes(y=len,x=dose), data=ToothGrowth)+geom_boxplot(aes(fill=dose))
+g+labs(x="dose (mg/day)", y="length", title="Length as a function of Dose")
+mean(ToothGrowth[ToothGrowth$supp=='OJ',]$len)
+mean(ToothGrowth[ToothGrowth$supp=='VC',]$len)
+```
+
+You can observe that length consistently increases with the dose value and also geinea pigs that received the dose through Orange Juice (OJ) has better growth compared to ascorbic acid (VC).
+
+Some additional insights about the data where we summarize based on Supplement type & Dose combinations as we have only 10 observations for each of these combinations
+
+```{r}
+for(s in c("VC", "OJ")) {
+  for(d in c(0.5, 1.0, 2.0)) {
+    combData <- ToothGrowth[ToothGrowth$supp==s&ToothGrowth$dose==d,]$len
+      print(paste("Summary for supp", s, "& dose", d), quote=FALSE)
+      print(summary(combData), quote=FALSE)
+      print(paste("Variance for supp", s, "& dose", d, "is", round(var(combData),2)), quote=FALSE)
+      print("", quote=FALSE)
+  }
+}
+```
+
+
+#### **3) Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose**
+
+As seen the previous section geinea pigs that received the dose through Orange Juice (OJ) has better growth compared to ascorbic acid (VC). In this section we will illustrate this through t.test method. We also investigate how different dose values play a role in the growth of the tooth
+
+```{r}
+t.test(len~supp, data=ToothGrowth)
+t.test(len~dose, data=ToothGrowth[ToothGrowth$dose==0.5|ToothGrowth$dose==2.0,])
+t.test(len~dose, data=ToothGrowth[ToothGrowth$dose==0.5|ToothGrowth$dose==1.0,])
+t.test(len~dose, data=ToothGrowth[ToothGrowth$dose==1.0|ToothGrowth$dose==2.0,])
+```
+
+You can observe that length consistently increases with the dose value and also geinea pigs that received the dose through Orange Juice (OJ) has better growth compared to ascorbic acid (VC)
+
+#### **3) State your conclusions and the assumptions needed for your conclusions**
+
+Based on the analysis of the ToothGrowth data, the results are summarized below:
+
+1. Increase in the dose value consistently increases the growth of the tooth irrespective of the Supplement
+2. Supplement administered through Orange Juice (OJ) has better growth compared to gascorbic acid (VC)
+
+These conclusions are based on the limited dataset of 10 observations for each of the combination (Supplement & Dose). Though the results are consistent the data used for analysis doesn't appear to be statistically significant. Also looking at the high variance for each of the Supplement type & Dose combinations it is clear that data available for this analysis is not statistically significant
